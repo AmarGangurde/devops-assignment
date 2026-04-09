@@ -28,6 +28,9 @@ const SERVICES = {
   frontend: process.env.FRONTEND_URL || 'http://frontend:3000',
   loki: process.env.LOKI_URL || 'http://loki:3100',
   prometheus: process.env.PROMETHEUS_URL || 'http://prometheus:9090',
+  nginx: process.env.NGINX_URL || 'http://nginx:80',
+  grafana: process.env.GRAFANA_URL || 'http://grafana:3000',
+  promtail: process.env.PROMTAIL_URL || 'http://promtail:9080',
 };
 
 // In-memory health state
@@ -41,6 +44,9 @@ async function checkServiceHealth(name, url) {
     : name === 'frontend' ? `${url}/`
     : name === 'loki' ? `${url}/ready`
     : name === 'prometheus' ? `${url}/-/healthy`
+    : name === 'nginx' ? `${url}/nginx-health`
+    : name === 'grafana' ? `${url}/api/health`
+    : name === 'promtail' ? `${url}/ready`
     : `${url}/`;
 
   try {
@@ -70,7 +76,7 @@ async function fetchRecentLogs(service, limit = 50) {
   try {
     const end = Math.floor(Date.now() / 1000);
     const start = end - 600; // last 10 min
-    const query = encodeURIComponent(`{service="${service}"}`);
+    const query = encodeURIComponent(`{service="supachat-${service}"}`);
     const url = `${SERVICES.loki}/loki/api/v1/query_range?query=${query}&start=${start}000000000&end=${end}000000000&limit=${limit}`;
     const resp = await axios.get(url, { timeout: 8000 });
     const result = resp.data?.data?.result || [];

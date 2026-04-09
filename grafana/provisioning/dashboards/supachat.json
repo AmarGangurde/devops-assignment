@@ -69,8 +69,8 @@
       "id": 5,
       "targets": [
         {
-          "expr": "rate(process_cpu_seconds_total{service=\"supachat-backend\"}[1m])",
-          "legendFormat": "CPU Usage",
+          "expr": "rate(container_cpu_usage_seconds_total{name=\"supachat-backend\"}[1m])",
+          "legendFormat": "Container CPU Usage",
           "refId": "A"
         }
       ],
@@ -84,8 +84,8 @@
       "id": 6,
       "targets": [
         {
-          "expr": "process_resident_memory_bytes{service=\"supachat-backend\"}",
-          "legendFormat": "Memory (RSS)",
+          "expr": "container_memory_usage_bytes{name=\"supachat-backend\"}",
+          "legendFormat": "Container Memory Usage",
           "refId": "A"
         }
       ],

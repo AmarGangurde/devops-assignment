@@ -40,12 +40,12 @@ http {
 
     # Upstreams
     upstream frontend {
-        server frontend:3000;
+        server ${FRONTEND_UPSTREAM};
         keepalive 32;
     }
 
     upstream backend {
-        server backend:3001;
+        server ${BACKEND_UPSTREAM};
         keepalive 32;
     }
 

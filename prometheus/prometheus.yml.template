@@ -11,7 +11,7 @@ scrape_configs:
 
   - job_name: 'supachat-backend'
     static_configs:
-      - targets: ['backend:3001']
+      - targets: ['${BACKEND_TARGET}']
         labels:
           service: 'supachat-backend'
     metrics_path: '/metrics'
@@ -19,5 +19,5 @@ scrape_configs:
 
   - job_name: 'cadvisor'
     static_configs:
-      - targets: ['cadvisor:8080']
+      - targets: ['${CADVISOR_TARGET}']
     scrape_interval: 15s
