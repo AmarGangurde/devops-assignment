@@ -5,6 +5,7 @@ const { register, collectDefaultMetrics } = require('prom-client');
 const logger = require('./utils/logger');
 const chatRouter = require('./routes/chat');
 const healthRouter = require('./routes/health');
+const crudRouter = require('./routes/crud');
 const { requestMetrics } = require('./middleware/metrics');
 
 const app = express();
@@ -20,6 +21,7 @@ app.use(requestMetrics);
 
 // Routes
 app.use('/api', chatRouter);
+app.use('/api/crud', crudRouter);
 app.use('/health', healthRouter);
 
 // Prometheus metrics endpoint

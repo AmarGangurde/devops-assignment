@@ -261,15 +261,49 @@ The AI-powered DevOps agent runs on port 4001 and:
 
 ---
 
-## 🚀 Deployment on Your Platform
+## 🌐 Wrexer.com Deployment
 
-1. **Push image** via CI workflow (or manually trigger workflow)
-2. **Create container** on your platform using:
-   ```
-   ghcr.io/<owner>/supachat-backend:latest
-   ```
-3. **Set environment variables** from `.env.example` in the platform dashboard
-4. **Rolling update** — change image tag → platform rolls containers automatically
+This guide outlines how to deploy the 8 SupaChat services to Wrexer.com using their internal IPs for connectivity and public URLs for entry points.
+
+### How Networking Works on Wrexer (Traefik)
+
+Wrexer uses **Traefik** to handle incoming internet traffic. Here is the deal with ports:
+
+1. **Public/External (Internet)**: Traefik automatically maps your apps to **443 (HTTPS)** and **80 (HTTP)**. You don't have to do anything here.
+2. **Internal (Service-to-Service)**: Within the Wrexer network, your containers still listen on their "original" ports (the ones in the `EXPOSE` line of the Dockerfiles).
+    - **Backend**: `3001`
+    - **Loki**: `3100`
+    - **Prometheus**: `9090`
+    - **Grafana**: `3000`
+    - **DevOps Agent**: `4001`
+3. **The "Basically Nothing" Part**: For the public internet, you don't need to configure anything. But for the **internal connections**, you must set the environment variables so the services can discover each other.
+
+### Deployment Step-by-Step
+
+#### 1. PostgreSQL (Wrexer Managed)
+- **Status**: Launch first or use existing.
+- **Connection String**: `postgres://u_...`
+- **Action**: Note the full connection string and set `DATABASE_SSL=false` in the Backend.
+
+#### 2. Loki & Prometheus
+- **Status**: Early dependencies.
+- **Action**: Note internal IPs (e.g., `10.43.x.x`).
+
+#### 3. Backend & Frontend
+- **Backend Env**: `DATABASE_URL`, `DATABASE_SSL=false`, `OPENAI_API_KEY`, `OPENAI_BASE_URL`.
+- **Frontend**: Standard deployment.
+
+#### 4. Nginx (Entry Point)
+- **Env Vars**: `FRONTEND_UPSTREAM`, `BACKEND_UPSTREAM` (Use internal IPs).
+- **Public URL**: Point your domain here.
+
+#### 5. Grafana & DevOps Agent
+- **Grafana Env**: `PROMETHEUS_URL`, `LOKI_URL`.
+- **Agent Env**: URLs for all services, `OPENAI_API_KEY`.
+
+---
+
+## 🔁 CI/CD Pipeline
 
 ---
 

@@ -4,6 +4,7 @@ import { Send, Loader2, Sparkles, Database } from 'lucide-react';
 import { sendChatMessage, ChatMessage, QueryResult } from '../lib/api';
 import MessageBubble from './MessageBubble';
 import QueryHistory from './QueryHistory';
+import DataManager from './DataManager';
 
 const EXAMPLE_QUERIES = [
   'Show top trending topics in last 30 days',
@@ -18,6 +19,7 @@ export default function ChatInterface() {
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
   const [queryHistory, setQueryHistory] = useState<string[]>([]);
+  const [view, setView] = useState<'chat' | 'database'>('chat');
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
 
@@ -118,43 +120,70 @@ export default function ChatInterface() {
           </div>
         </div>
 
-        {/* Example queries */}
-        <div style={{ padding: '16px', borderBottom: '1px solid var(--border)' }}>
-          <div style={{ fontSize: '11px', fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '10px' }}>
-            Try asking...
-          </div>
-          {EXAMPLE_QUERIES.map((q, i) => (
-            <button
-              key={i}
-              onClick={() => sendMessage(q)}
-              style={{
-                display: 'block', width: '100%', textAlign: 'left',
-                padding: '8px 10px', marginBottom: '4px',
-                background: 'transparent', border: '1px solid transparent',
-                borderRadius: '8px', cursor: 'pointer',
-                color: 'var(--text-secondary)', fontSize: '12px',
-                transition: 'all 0.15s ease',
-              }}
-              onMouseEnter={e => {
-                (e.target as HTMLElement).style.background = 'var(--bg-hover)';
-                (e.target as HTMLElement).style.borderColor = 'var(--border)';
-                (e.target as HTMLElement).style.color = 'var(--text-primary)';
-              }}
-              onMouseLeave={e => {
-                (e.target as HTMLElement).style.background = 'transparent';
-                (e.target as HTMLElement).style.borderColor = 'transparent';
-                (e.target as HTMLElement).style.color = 'var(--text-secondary)';
-              }}
-            >
-              {q}
-            </button>
-          ))}
+        {/* Navigation */}
+        <div style={{ padding: '12px', borderBottom: '1px solid var(--border)' }}>
+          <button 
+            onClick={() => setView('chat')}
+            style={{
+              display: 'flex', alignItems: 'center', gap: '8px', 
+              width: '100%', padding: '10px', borderRadius: '8px',
+              background: view === 'chat' ? 'var(--accent-dim)' : 'transparent',
+              color: view === 'chat' ? 'var(--accent)' : 'var(--text-secondary)',
+              border: view === 'chat' ? '1px solid var(--accent)' : '1px solid transparent',
+              cursor: 'pointer', fontSize: '14px', fontWeight: 600, transition: 'all 0.2s',
+            }}
+          >
+            <Sparkles size={16} />
+            Analyst Chat
+          </button>
+          <button 
+            onClick={() => setView('database')}
+            style={{
+              display: 'flex', alignItems: 'center', gap: '8px', 
+              width: '100%', padding: '10px', borderRadius: '8px',
+              background: view === 'database' ? 'var(--accent-dim)' : 'transparent',
+              color: view === 'database' ? 'var(--accent)' : 'var(--text-secondary)',
+              border: view === 'database' ? '1px solid var(--accent)' : '1px solid transparent',
+              cursor: 'pointer', fontSize: '14px', fontWeight: 600, transition: 'all 0.2s',
+              marginTop: '4px',
+            }}
+          >
+            <Database size={16} />
+            Data Manager
+          </button>
         </div>
 
-        {/* Query history */}
-        <div style={{ flex: 1, overflow: 'hidden' }}>
-          <QueryHistory queries={queryHistory} onSelect={sendMessage} />
-        </div>
+        {/* Example queries (only in chat view) */}
+        {view === 'chat' && (
+          <div style={{ padding: '16px', borderBottom: '1px solid var(--border)' }}>
+            <div style={{ fontSize: '11px', fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '10px' }}>
+              Try asking...
+            </div>
+            {EXAMPLE_QUERIES.map((q, i) => (
+              <button
+                key={i}
+                onClick={() => sendMessage(q)}
+                style={{
+                  display: 'block', width: '100%', textAlign: 'left',
+                  padding: '8px 10px', marginBottom: '4px',
+                  background: 'transparent', border: '1px solid transparent',
+                  borderRadius: '8px', cursor: 'pointer',
+                  color: 'var(--text-secondary)', fontSize: '12px',
+                  transition: 'all 0.15s ease',
+                }}
+              >
+                {q}
+              </button>
+            ))}
+          </div>
+        )}
+
+        {/* Query history (only in chat view) */}
+        {view === 'chat' && (
+          <div style={{ flex: 1, overflow: 'hidden' }}>
+            <QueryHistory queries={queryHistory} onSelect={sendMessage} />
+          </div>
+        )}
 
         {/* DB indicator */}
         <div style={{
@@ -169,94 +198,99 @@ export default function ChatInterface() {
         </div>
       </aside>
 
-      {/* Main chat area */}
+      {/* Main area */}
       <main style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
-        {/* Messages */}
-        <div style={{ flex: 1, overflowY: 'auto', padding: '24px' }}>
-          {messages.length === 0 && (
-            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', gap: '16px' }}>
+        {view === 'chat' ? (
+          <>
+            {/* Messages */}
+            <div style={{ flex: 1, overflowY: 'auto', padding: '24px' }}>
+              {messages.length === 0 && (
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', gap: '16px' }}>
+                  <div style={{
+                    width: '64px', height: '64px',
+                    background: 'var(--accent-dim)',
+                    borderRadius: '20px',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    border: '1px solid var(--accent)',
+                  }}>
+                    <Sparkles size={28} color="var(--accent)" />
+                  </div>
+                  <div style={{ textAlign: 'center' }}>
+                    <h2 style={{ fontSize: '22px', fontWeight: 700, color: 'var(--text-primary)', marginBottom: '8px' }}>
+                      Ask anything about your data
+                    </h2>
+                    <p style={{ color: 'var(--text-secondary)', fontSize: '14px', maxWidth: '400px' }}>
+                      Query your blog analytics database in plain English. Get results as charts, tables, or summaries.
+                    </p>
+                  </div>
+                </div>
+              )}
+
+              {messages.map(msg => (
+                <MessageBubble key={msg.id} message={msg} />
+              ))}
+              <div ref={messagesEndRef} />
+            </div>
+
+            {/* Input area */}
+            <div style={{
+              padding: '16px 24px',
+              borderTop: '1px solid var(--border)',
+              background: 'var(--bg-secondary)',
+            }}>
               <div style={{
-                width: '64px', height: '64px',
-                background: 'var(--accent-dim)',
-                borderRadius: '20px',
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                border: '1px solid var(--accent)',
-              }}>
-                <Sparkles size={28} color="var(--accent)" />
+                display: 'flex', gap: '12px', alignItems: 'flex-end',
+                background: 'var(--bg-card)',
+                border: '1px solid var(--border)',
+                borderRadius: '14px',
+                padding: '12px 16px',
+                transition: 'border-color 0.2s',
+              }}
+              >
+                <textarea
+                  ref={inputRef}
+                  value={input}
+                  onChange={e => setInput(e.target.value)}
+                  onKeyDown={handleKeyDown}
+                  placeholder="Ask about your analytics... (Press Enter to send)"
+                  rows={1}
+                  style={{
+                    flex: 1, background: 'transparent', border: 'none', outline: 'none',
+                    resize: 'none', color: 'var(--text-primary)', fontSize: '14px',
+                    lineHeight: '1.5', maxHeight: '120px', overflowY: 'auto',
+                    fontFamily: 'inherit',
+                  }}
+                  onInput={e => {
+                    const t = e.target as HTMLTextAreaElement;
+                    t.style.height = 'auto';
+                    t.style.height = Math.min(t.scrollHeight, 120) + 'px';
+                  }}
+                />
+                <button
+                  onClick={() => sendMessage(input)}
+                  disabled={!input.trim() || loading}
+                  style={{
+                    width: '36px', height: '36px', borderRadius: '10px',
+                    background: input.trim() && !loading ? 'var(--accent)' : 'var(--bg-hover)',
+                    border: 'none', cursor: input.trim() && !loading ? 'pointer' : 'not-allowed',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    transition: 'all 0.2s ease', flexShrink: 0,
+                  }}
+                >
+                  {loading
+                    ? <Loader2 size={16} color="var(--text-muted)" className="animate-spin" />
+                    : <Send size={16} color={input.trim() ? '#fff' : 'var(--text-muted)'} />
+                  }
+                </button>
               </div>
-              <div style={{ textAlign: 'center' }}>
-                <h2 style={{ fontSize: '22px', fontWeight: 700, color: 'var(--text-primary)', marginBottom: '8px' }}>
-                  Ask anything about your data
-                </h2>
-                <p style={{ color: 'var(--text-secondary)', fontSize: '14px', maxWidth: '400px' }}>
-                  Query your blog analytics database in plain English. Get results as charts, tables, or summaries.
-                </p>
+              <div style={{ textAlign: 'center', marginTop: '8px', fontSize: '11px', color: 'var(--text-muted)' }}>
+                SupaChat converts your natural language to SQL and visualizes results. Shift+Enter for new line.
               </div>
             </div>
-          )}
-
-          {messages.map(msg => (
-            <MessageBubble key={msg.id} message={msg} />
-          ))}
-          <div ref={messagesEndRef} />
-        </div>
-
-        {/* Input area */}
-        <div style={{
-          padding: '16px 24px',
-          borderTop: '1px solid var(--border)',
-          background: 'var(--bg-secondary)',
-        }}>
-          <div style={{
-            display: 'flex', gap: '12px', alignItems: 'flex-end',
-            background: 'var(--bg-card)',
-            border: '1px solid var(--border)',
-            borderRadius: '14px',
-            padding: '12px 16px',
-            transition: 'border-color 0.2s',
-          }}
-            onFocus={() => {}}
-          >
-            <textarea
-              ref={inputRef}
-              value={input}
-              onChange={e => setInput(e.target.value)}
-              onKeyDown={handleKeyDown}
-              placeholder="Ask about your analytics... (Press Enter to send)"
-              rows={1}
-              style={{
-                flex: 1, background: 'transparent', border: 'none', outline: 'none',
-                resize: 'none', color: 'var(--text-primary)', fontSize: '14px',
-                lineHeight: '1.5', maxHeight: '120px', overflowY: 'auto',
-                fontFamily: 'inherit',
-              }}
-              onInput={e => {
-                const t = e.target as HTMLTextAreaElement;
-                t.style.height = 'auto';
-                t.style.height = Math.min(t.scrollHeight, 120) + 'px';
-              }}
-            />
-            <button
-              onClick={() => sendMessage(input)}
-              disabled={!input.trim() || loading}
-              style={{
-                width: '36px', height: '36px', borderRadius: '10px',
-                background: input.trim() && !loading ? 'var(--accent)' : 'var(--bg-hover)',
-                border: 'none', cursor: input.trim() && !loading ? 'pointer' : 'not-allowed',
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                transition: 'all 0.2s ease', flexShrink: 0,
-              }}
-            >
-              {loading
-                ? <Loader2 size={16} color="var(--text-muted)" className="animate-spin" />
-                : <Send size={16} color={input.trim() ? '#fff' : 'var(--text-muted)'} />
-              }
-            </button>
-          </div>
-          <div style={{ textAlign: 'center', marginTop: '8px', fontSize: '11px', color: 'var(--text-muted)' }}>
-            SupaChat converts your natural language to SQL and visualizes results. Shift+Enter for new line.
-          </div>
-        </div>
+          </>
+        ) : (
+          <DataManager onBack={() => setView('chat')} />
+        )}
       </main>
     </div>
   );
