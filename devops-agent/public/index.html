@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SupaChat | DevOps Agent</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="glass-bg"></div>
+    
+    <nav>
+        <div class="logo">
+            <span class="bot-icon">🤖</span>
+            <span class="brand">SupaChat <span>DevOps</span></span>
+        </div>
+        <div class="nav-status">
+            <span id="global-status-dot" class="status-dot"></span>
+            <span id="global-status-text">Connecting...</span>
+        </div>
+    </nav>
+
+    <main>
+        <section class="health-grid" id="health-grid">
+            <!-- Service Cards injected here -->
+        </section>
+
+        <div class="dashboard-split">
+            <section class="incidents-panel">
+                <header>
+                    <h2>🚨 Recent Incidents</h2>
+                    <span class="badge" id="incident-badge">0</span>
+                </header>
+                <div id="incidents-list" class="scroll-area">
+                    <div class="empty-state">No active incidents detected.</div>
+                </div>
+            </section>
+
+            <section class="diagnostics-panel">
+                <header>
+                    <h2>🔍 On-Demand Diagnosis</h2>
+                </header>
+                <div class="control-box">
+                    <select id="service-select">
+                        <option value="backend">Backend API</option>
+                        <option value="frontend">Frontend Web</option>
+                        <option value="loki">Loki Logs</option>
+                        <option value="prometheus">Prometheus</option>
+                    </select>
+                    <button id="diagnose-btn">Run AI Diagnostic</button>
+                </div>
+                <div id="diagnosis-result" class="diagnosis-content">
+                    <p class="placeholder">Select a service and run diagnostic to see AI insights.</p>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <!-- Modal for Logs -->
+    <div id="log-modal" class="modal">
+        <div class="modal-content">
+            <header>
+                <h3 id="modal-title">Service Logs</h3>
+                <button class="close-btn">&times;</button>
+            </header>
+            <pre id="log-content"></pre>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
